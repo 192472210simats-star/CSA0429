@@ -1,0 +1,78 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+bool isPageInFrames(int frames[], int frameCount, int page) {
+    for (int i = 0; i < frameCount; i++) {
+        if (frames[i] == page) {
+            return true;
+        }
+    }
+    return false;
+}
+void displayFrames(int frames[], int frameCount) {
+    for (int i = 0; i < frameCount; i++) {
+        if (frames[i] == -1)
+            printf(" - ");
+        else
+            printf(" %d ", frames[i]);
+    }
+    printf("\n");
+}
+int main() {
+    int frameCount, pageCount;
+    printf("Enter number of frames: ");
+    if (scanf("%d", &frameCount) != 1 || frameCount <= 0) {
+        printf("Invalid input. Number of frames must be a positive integer.\n");
+        return 1;
+    }
+
+    // Input number of pages
+    printf("Enter number of pages: ");
+    if (scanf("%d", &pageCount) != 1 || pageCount <= 0) {
+        printf("Invalid input. Number of pages must be a positive integer.\n");
+        return 1;
+    }
+    int *pages = (int *)malloc(pageCount * sizeof(int));
+    if (!pages) {
+        printf("Memory allocation failed.\n");
+        return 1;
+    }
+    printf("Enter the page reference string (space-separated): ");
+    for (int i = 0; i < pageCount; i++) {
+        if (scanf("%d", &pages[i]) != 1) {
+            printf("Invalid input. Please enter integers only.\n");
+            free(pages);
+            return 1;
+        }
+    }
+    int *frames = (int *)malloc(frameCount * sizeof(int));
+    if (!frames) {
+        printf("Memory allocation failed.\n");
+        free(pages);
+        return 1;
+    }
+    for (int i = 0; i < frameCount; i++) {
+        frames[i] = -1;
+    }
+    int pageFaults = 0;
+    int nextToReplace = 0; // FIFO pointer
+    printf("\n--- FIFO Page Replacement Simulation ---\n");
+    printf("Page\tFrames\t\tPage Fault\n");
+    for (int i = 0; i < pageCount; i++) {
+        int currentPage = pages[i];
+        bool faultOccurred = false;
+        if (!isPageInFrames(frames, frameCount, currentPage)) {
+            frames[nextToReplace] = currentPage;
+            nextToReplace = (nextToReplace + 1) % frameCount;
+            pageFaults++;
+            faultOccurred = true;
+        }
+        printf("%d\t", currentPage);
+        displayFrames(frames, frameCount);
+        printf("\t%s\n", faultOccurred ? "Yes" : "No");
+    }
+    printf("\nTotal Page Faults: %d\n", pageFaults);
+    free(pages);
+    free(frames);
+    return 0;
+}
