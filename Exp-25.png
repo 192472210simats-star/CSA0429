@@ -1,0 +1,65 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>     
+#include <sys/stat.h>   
+#include <dirent.h>    
+#include <string.h>     
+#include <errno.h>
+
+int main() {
+    int fd;
+    struct stat file_stat;
+    DIR *dir;
+    struct dirent *entry;
+    fd = open("demo_file.txt", O_RDWR | O_CREAT, 0644);
+    if (fd == -1) {
+        perror("open");
+        exit(EXIT_FAILURE);
+    }
+    printf("Opened demo_file.txt with fd = %d\n", fd);
+    int flags = fcntl(fd, F_GETFL);
+    if (flags == -1) {
+        perror("fcntl F_GETFL");
+    } else {
+        printf("Current flags before F_SETFL: %d\n", flags);
+        if (fcntl(fd, F_SETFL, flags | O_APPEND) == -1) {
+            perror("fcntl F_SETFL O_APPEND");
+        } else {
+            printf("O_APPEND flag set using fcntl.\n");
+        }
+    }
+    off_t offset = lseek(fd, 0, SEEK_END); // go to end
+    if (offset == -1) {
+        perror("lseek");
+    } else {
+        printf("Moved file offset to end: %lld\n", (long long)offset);
+    }
+    const char *text = "Hello from UNIX system calls!\n";
+    write(fd, text, strlen(text));
+    if (stat("demo_file.txt", &file_stat) == -1) {
+        perror("stat");
+    } else {
+        printf("File size: %lld bytes\n", (long long)file_stat.st_size);
+        printf("Last modified: %ld\n", file_stat.st_mtime);
+    
+    printf("\nDirectory contents:\n");
+    dir = opendir(".");
+    if (dir == NULL) {
+        perror("opendir");
+        close(fd);
+        exit(EXIT_FAILURE);
+    }
+
+    while ((entry = readdir(dir)) != NULL) {
+        printf(" %s\n", entry->d_name);
+    }
+    closedir(dir);
+    if (close(fd) == -1) {
+        perror("close");
+    } else {
+        printf("\nFile closed.\n");
+    }
+
+    return 0;
+}
