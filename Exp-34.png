@@ -1,0 +1,50 @@
+#include <stdio.h>
+#include <string.h>
+#define MAX_BLOCKS 50   
+#define MAX_FILES 10    
+int main() {
+    int disk[MAX_BLOCKS] = {0}; // 0 means free block
+    int i, j, start, size;
+    char name[20];
+    int used = 0;
+    printf("Sequential File Allocation Simulation\n");
+    printf("Total Disk Blocks Available: %d\n", MAX_BLOCKS);
+    for (i = 0; i < MAX_FILES; i++) {
+        printf("\nEnter file name (or \"end\" to stop): ");
+        scanf("%s", name);
+        if (strcmp(name, "end") == 0) {
+            break;
+        }
+        printf("Enter file size (in blocks): ");
+        scanf("%d", &size);
+        int found = 0;
+        for (start = 0; start <= MAX_BLOCKS - size; start++) {
+            int freeCount = 1;
+            for (j = start; j < start + size; j++) {
+                if (disk[j] != 0) {
+                    freeCount = 0;
+                    break;
+                }
+            }
+            if (freeCount) {
+                found = 1;
+                break;
+            }
+        }
+        if (!found) {
+            printf("Not enough contiguous space for file \"%s\" (size %d blocks).\n", name, size);
+        } else {
+            for (j = start; j < start + size; j++) {
+                disk[j] = 1; // mark block as used
+            }
+            printf("File \"%s\" allocated from block %d to %d.\n", name, start, start + size - 1);
+            used += size;
+        }
+    }
+    printf("\nDisk Allocation Status:\n");
+    for (i = 0; i < MAX_BLOCKS; i++) {
+        printf("%d ", disk[i]);
+    }
+    printf("\nTotal Used Blocks: %d\n", used);
+    return 0;
+}
