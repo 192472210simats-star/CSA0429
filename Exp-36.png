@@ -1,0 +1,58 @@
+#include <stdio.h>
+#include <stdlib.h>
+#define MAX_BLOCKS 100
+typedef struct Block {
+    int blockNum;           
+    struct Block* next;      
+} Block;
+int diskStatus[MAX_BLOCKS];
+Block* createBlock(int num) {
+    Block* newBlock = (Block*)malloc(sizeof(Block));
+    newBlock->blockNum = num;
+    newBlock->next = NULL;
+    return newBlock;
+}
+int main() {
+    int i, n, blockNum;
+    Block* start = NULL;  // Head pointer (first block)
+    Block* last = NULL;   // Last block pointer
+    char fileName[20];
+    for (i = 0; i < MAX_BLOCKS; i++) {
+        diskStatus[i] = 0;
+    }
+    printf("Linked File Allocation Simulation\n\n");
+    printf("Enter file name: ");
+    scanf("%s", fileName);
+    printf("Enter number of blocks required: ");
+    scanf("%d", &n);
+    printf("Enter %d block numbers to allocate for the file:\n", n);
+    for (i = 0; i < n; i++) {
+        scanf("%d", &blockNum);
+        if (blockNum < 0 || blockNum >= MAX_BLOCKS) {
+            printf("Invalid block number %d — ignored.\n", blockNum);
+            i--; 
+            continue;
+        }
+        if (diskStatus[blockNum] == 1) {
+            printf("Block %d already allocated — try another.\n", blockNum);
+            i--;
+            continue;
+        }
+        diskStatus[blockNum] = 1;
+        Block* newBlock = createBlock(blockNum);
+        if (start == NULL) {
+            start = newBlock;   // First block
+        } else {
+            last->next = newBlock;
+        }
+        last = newBlock;
+    }
+    printf("\nFile \"%s\" blocks linked as:\n", fileName);
+    Block* ptr = start;
+    while (ptr != NULL) {
+        printf("%d -> ", ptr->blockNum);
+        ptr = ptr->next;
+    }
+    printf("NULL\n");
+    return 0;
+}
