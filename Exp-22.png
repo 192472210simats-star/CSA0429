@@ -1,0 +1,69 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>      
+#include <unistd.h>    
+#include <sys/stat.h>  
+#include <dirent.h>    
+#include <string.h>
+#include <errno.h>
+void display_file_info(const char *filename) {
+    struct stat fileStat;
+    if (stat(filename, &fileStat) == -1) {
+        perror("stat");
+        return;
+    }
+    printf("\n--- File Information ---\n");
+    printf("File: %s\n", filename);
+    printf("Size: %ld bytes\n", fileStat.st_size);
+    printf("Permissions: %o (octal)\n", fileStat.st_mode & 0777);
+    printf("Last modified: %ld\n", fileStat.st_mtime);
+}
+void list_directory(const char *dirname) {
+    DIR *dir = opendir(dirname);
+    if (!dir) {
+        perror("opendir");
+        return;
+    }
+    struct dirent *entry;
+    printf("\n--- Directory Contents of %s ---\n", dirname);
+    while ((entry = readdir(dir)) != NULL) {
+        printf("%s\n", entry->d_name);
+    }
+    closedir(dir);
+}
+int main() {
+    char filename[256], dirname[256];
+    int fd;
+    printf("Enter file name to open: ");
+    if (scanf("%255s", filename) != 1) {
+        fprintf(stderr, "Invalid input.\n");
+        return 1;
+    }
+    fd = open(filename, O_RDWR);
+    if (fd == -1) {
+        perror("open");
+        return 1;
+    }
+    printf("File '%s' opened successfully.\n", filename);
+    int flags = fcntl(fd, F_GETFL);
+    if (flags == -1) {
+        perror("fcntl");
+    } else {
+        printf("File descriptor flags: %d\n", flags);
+    }
+    off_t file_size = lseek(fd, 0, SEEK_END);
+    if (file_size == -1) {
+        perror("lseek");
+    } else {
+        printf("File size (via lseek): %ld bytes\n", file_size);
+    }
+    display_file_info(filename);
+    close(fd);
+    printf("\nEnter directory name to list: ");
+    if (scanf("%255s", dirname) != 1) {
+        fprintf(stderr, "Invalid input.\n");
+        return 1;
+    }
+    list_directory(dirname);
+    return 0;
+}
