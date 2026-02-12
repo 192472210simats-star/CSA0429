@@ -1,0 +1,67 @@
+#include <stdio.h>
+#include <stdlib.h>
+int compare(const void *a, const void *b) {
+    return (*(int *)a - *(int *)b);
+}
+void cscan(int requests[], int n, int head, int disk_size) {
+    int seek_count = 0;
+    int distance, cur_track;
+    int i, j;
+    qsort(requests, n, sizeof(int), compare);
+    int index = 0;
+    for (i = 0; i < n; i++) {
+        if (head < requests[i]) {
+            index = i;
+            break;
+        }
+    }
+    printf("\nSeek Sequence: ");
+    for (i = index; i < n; i++) {
+        cur_track = requests[i];
+        printf("%d ", cur_track);
+        distance = abs(cur_track - head);
+        seek_count += distance;
+        head = cur_track;
+    }
+    if (index != 0) {
+        seek_count += abs((disk_size - 1) - head);
+        seek_count += (disk_size - 1);
+        head = 0;
+        for (i = 0; i < index; i++) {
+            cur_track = requests[i];
+            printf("%d ", cur_track);
+            distance = abs(cur_track - head);
+            seek_count += distance;
+            head = cur_track;
+        }
+    }
+    printf("\nTotal Seek Operations: %d\n", seek_count);
+}
+int main() {
+    int n, i, head, disk_size;
+    printf("Enter total number of disk requests: ");
+    if (scanf("%d", &n) != 1 || n <= 0) {
+        printf("Invalid number of requests.\n");
+        return 1;
+    }
+    int requests[n];
+    printf("Enter the disk request sequence: ");
+    for (i = 0; i < n; i++) {
+        if (scanf("%d", &requests[i]) != 1 || requests[i] < 0) {
+            printf("Invalid request value.\n");
+            return 1;
+        }
+    }
+    printf("Enter initial head position: ");
+    if (scanf("%d", &head) != 1 || head < 0) {
+        printf("Invalid head position.\n");
+        return 1;
+    }
+    printf("Enter total disk size (number of tracks): ");
+    if (scanf("%d", &disk_size) != 1 || disk_size <= 0) {
+        printf("Invalid disk size.\n");
+        return 1;
+    }
+    cscan(requests, n, head, disk_size);
+    return 0;
+}
