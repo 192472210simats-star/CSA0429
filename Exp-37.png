@@ -1,0 +1,38 @@
+#include <stdio.h>
+#include <stdlib.h>
+int calculateTotalHeadMovement(int requests[], int n, int head) {
+    int totalMovement = 0;
+    for (int i = 0; i < n; i++) {
+        totalMovement += abs(requests[i] - head); // Distance from current head to request
+        head = requests[i]; // Move head to current request
+    }
+    return totalMovement;
+}
+int main() {
+    int n, head;
+    printf("Enter the number of disk requests: ");
+    if (scanf("%d", &n) != 1 || n <= 0) {
+        printf("Invalid number of requests.\n");
+        return 1;
+    }
+    int requests[n];
+    printf("Enter the disk requests sequence: ");
+    for (int i = 0; i < n; i++) {
+        if (scanf("%d", &requests[i]) != 1 || requests[i] < 0) {
+            printf("Invalid request value.\n");
+            return 1;
+        }
+    }
+    printf("Enter the initial head position: ");
+    if (scanf("%d", &head) != 1 || head < 0) {
+        printf("Invalid head position.\n");
+        return 1;
+    }
+    int totalMovement = calculateTotalHeadMovement(requests, n, head);
+    printf("\nOrder of service: %d", head);
+    for (int i = 0; i < n; i++) {
+        printf(" -> %d", requests[i]);
+    }
+    printf("\nTotal head movement: %d\n", totalMovement);
+    return 0;
+}
