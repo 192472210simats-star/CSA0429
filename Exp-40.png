@@ -1,0 +1,33 @@
+#include <stdio.h>
+#include <sys/stat.h>
+#include <stdlib.h>
+void printPerm(mode_t mode) {
+    printf("User:   %c%c%c\n",
+        (mode & S_IRUSR) ? 'r' : '-',
+        (mode & S_IWUSR) ? 'w' : '-',
+        (mode & S_IXUSR) ? 'x' : '-');
+
+    printf("Group:  %c%c%c\n",
+        (mode & S_IRGRP) ? 'r' : '-',
+        (mode & S_IWGRP) ? 'w' : '-',
+        (mode & S_IXGRP) ? 'x' : '-');
+
+    printf("Others: %c%c%c\n",
+        (mode & S_IROTH) ? 'r' : '-',
+        (mode & S_IWOTH) ? 'w' : '-',
+        (mode & S_IXOTH) ? 'x' : '-');
+}
+int main(int argc, char *argv[]) {
+    struct stat sb;
+    if (argc != 2) {
+        printf("Usage: %s <filename>\n", argv[0]);
+        return 1;
+    }
+    if (stat(argv[1], &sb) == -1) {
+        perror("stat");
+        return 1;
+    }
+    printf("Permissions for %s\n\n", argv[1]);
+    printPerm(sb.st_mode);
+    return 0;
+}
